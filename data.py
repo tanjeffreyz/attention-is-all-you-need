@@ -1,7 +1,6 @@
 import config
 import spacy
-import torch
-from torch import nn
+from torchtext.functional import to_tensor
 from torchtext.datasets import multi30k, Multi30k
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import DataLoader
@@ -36,10 +35,18 @@ def encode(pair):
     """Replaces tokens with their corresponding vocabulary indices"""
 
     src, trg = pair
-    return (
-        torch.tensor(src_vocab.lookup_indices(src)),
-        torch.tensor(trg_vocab.lookup_indices(trg))
-    )
+    return src_vocab.lookup_indices(src), trg_vocab.lookup_indices(trg)
+
+
+def pad(batch):
+    """
+    Pads all sequences in the batch to have same length. Pads using the EOS token because if <eos> is reached, model
+    should insist sequence has finished and output <eos> even if prompted further.
+    """
+
+    batch['source'] = to_tensor(batch['source'], padding_value=src_vocab[config.EOS])
+    batch['target'] = to_tensor(batch['target'], padding_value=trg_vocab[config.EOS])
+    return batch
 
 
 # Load datasets
@@ -58,26 +65,23 @@ trg_vocab = build_vocab_from_iterator(
 )
 trg_vocab.set_default_index(-1)
 
-# Initialize embeddings with same seed every time
-torch.manual_seed(20230815)
-src_embedding = nn.Embedding(len(src_vocab), config.D_MODEL)
-trg_embedding = nn.Embedding(len(trg_vocab), config.D_MODEL)
-torch.seed()        # Reseed afterward b/c want shuffled data
-
 # Tokenize, encode, and batch the data
+columns = ['source', 'target']
 train_processed = (
     train_data
     .map(tokenize)
     .map(encode)
     .batch(config.BATCH_SIZE)
-    .rows2columnar(config.LANGUAGE_PAIR)
+    .rows2columnar(columns)
+    .map(pad)
 )
 test_processed = (
     test_data
     .map(tokenize)
     .map(encode)
     .batch(config.BATCH_SIZE)
-    .rows2columnar(config.LANGUAGE_PAIR)
+    .rows2columnar(columns)
+    .map(pad)
 )
 train_loader = DataLoader(train_processed, batch_size=None, shuffle=True)
 test_loader = DataLoader(test_processed, batch_size=None, shuffle=False)
