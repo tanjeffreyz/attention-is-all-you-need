@@ -15,3 +15,12 @@ Lukasz Kaiser, Illia Polosukhin
     - Special "start of sequence" symbol `<sos>` is at the start of every sequence, fixes this off-by-one issue
     - On first pass, transformer sees the `source` sequence and `prev=[<sos>]`, so it knows to predict the first word
     - On second pass, transformer now sees `source` and `prev=[<sos>, first_prediction]`
+
+
+# Setup Instructions
+1. Run `python -m pip install -r requirements.txt`
+2. Download spacy language pipelines
+```
+python -m spacy download en_core_web_sm
+python -m spacy download de_core_news_sm
+```
