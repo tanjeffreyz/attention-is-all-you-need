@@ -1,6 +1,7 @@
 import config
 import spacy
 import torch
+from torch import nn
 from torchtext.datasets import multi30k, Multi30k
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import DataLoader
@@ -56,6 +57,12 @@ trg_vocab = build_vocab_from_iterator(
     specials=[config.SOS, config.EOS]
 )
 trg_vocab.set_default_index(-1)
+
+# Initialize embeddings with same seed every time
+torch.manual_seed(20230815)
+src_embedding = nn.Embedding(len(src_vocab), config.D_MODEL)
+trg_embedding = nn.Embedding(len(trg_vocab), config.D_MODEL)
+torch.seed()        # Reseed afterward b/c want shuffled data
 
 # Tokenize, encode, and batch the data
 train_processed = (
