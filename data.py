@@ -1,5 +1,6 @@
 import config
 import spacy
+import torch
 from torchtext.datasets import multi30k, Multi30k
 from torchtext.vocab import build_vocab_from_iterator
 from torch.utils.data import DataLoader
@@ -22,27 +23,26 @@ assert trg_lang in pipelines, 'Unrecognized target language'
 
 
 def tokenize(pair):
-    src_tokens = [config.SOS] + [x.text.lower() for x in pipelines[src_lang].tokenizer(pair[0])] + [config.EOS]
-    trg_tokens = [config.SOS] + [y.text.lower() for y in pipelines[trg_lang].tokenizer(pair[1])] + [config.EOS]
+    """Splits source and target sentences into tokens based on the configured language pair"""
+
+    src, trg = pair
+    src_tokens = [config.SOS] + [x.text.lower() for x in pipelines[src_lang].tokenizer(src)] + [config.EOS]
+    trg_tokens = [config.SOS] + [y.text.lower() for y in pipelines[trg_lang].tokenizer(trg)] + [config.EOS]
     return src_tokens, trg_tokens
 
 
-# Load, preprocess, and batch the data
+def encode(pair):
+    """Replaces tokens with their corresponding vocabulary indices"""
+
+    src, trg = pair
+    return (
+        torch.tensor(src_vocab.lookup_indices(src)),
+        torch.tensor(trg_vocab.lookup_indices(trg))
+    )
+
+
+# Load datasets
 train_data, _, test_data = Multi30k(root='data', language_pair=config.LANGUAGE_PAIR)
-train_processed = (
-    train_data
-    .map(tokenize)
-    .batch(config.BATCH_SIZE)
-    .rows2columnar(config.LANGUAGE_PAIR)
-)
-test_processed = (
-    test_data
-    .map(tokenize)
-    .batch(config.BATCH_SIZE)
-    .rows2columnar(config.LANGUAGE_PAIR)
-)
-train_loader = DataLoader(train_processed, batch_size=None, shuffle=True)
-test_loader = DataLoader(test_processed, batch_size=None, shuffle=False)
 
 # Build vocabs from dataset
 src_vocab = build_vocab_from_iterator(
@@ -57,5 +57,20 @@ trg_vocab = build_vocab_from_iterator(
 )
 trg_vocab.set_default_index(-1)
 
-print(len(src_vocab), src_vocab[config.SOS], src_vocab[config.EOS])
-print(len(trg_vocab), trg_vocab[config.SOS], trg_vocab[config.EOS])
+# Tokenize, encode, and batch the data
+train_processed = (
+    train_data
+    .map(tokenize)
+    .map(encode)
+    .batch(config.BATCH_SIZE)
+    .rows2columnar(config.LANGUAGE_PAIR)
+)
+test_processed = (
+    test_data
+    .map(tokenize)
+    .map(encode)
+    .batch(config.BATCH_SIZE)
+    .rows2columnar(config.LANGUAGE_PAIR)
+)
+train_loader = DataLoader(train_processed, batch_size=None, shuffle=True)
+test_loader = DataLoader(test_processed, batch_size=None, shuffle=False)
