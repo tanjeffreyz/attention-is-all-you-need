@@ -13,8 +13,12 @@ class Transformer(Module):
                  trg_vocab_len,
                  num_heads=8,
                  num_layers=6,
-                 dropout_rate=0.1):
+                 dropout_rate=0.1,
+                 seed=20230815):
         super().__init__()
+
+        # Manually seed to keep embeddings consistent across loads
+        torch.manual_seed(seed)
 
         # Embeddings
         self.src_embedding = Embedding(src_vocab_len, d_model)
@@ -38,6 +42,9 @@ class Transformer(Module):
 
         # Final linear layer to project embedding to target vocab word
         self.linear = nn.Linear(d_model, trg_vocab_len)
+
+        # Re-seed afterward to allow shuffled data
+        torch.seed()
 
     def forward(self, source, target):
         # Encoder stack

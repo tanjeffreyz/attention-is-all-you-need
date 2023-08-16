@@ -1,6 +1,3 @@
-# Reproducibility (otherwise embeddings are random every time)
-SEED = 20230815
-
 # Language settings
 LANGUAGE_PAIR = ('en', 'de')
 
