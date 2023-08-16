@@ -9,7 +9,8 @@ class Embedding(nn.Module):
 
         self.embedding = nn.Embedding(len(vocab), config.D_MODEL)
 
-    def positional_encoding(self, x):
+    @staticmethod
+    def positional_encoding(x):
         result = torch.zeros((x.size(1), config.D_MODEL), dtype=torch.float)
         pos = torch.arange(0, x.size(1)).unsqueeze(1)
         dim = torch.arange(0, config.D_MODEL)
