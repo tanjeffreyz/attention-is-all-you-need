@@ -19,6 +19,7 @@ class MultiHeadAttention(Module):
         self.w_q = nn.Linear(d_model, d_model)
         self.w_k = nn.Linear(d_model, d_model)
         self.w_v = nn.Linear(d_model, d_model)
+        self.w_o = nn.Linear(d_model, d_model)
 
     def forward(self, x):
         # x = (64, seq, 512)
@@ -33,7 +34,10 @@ class MultiHeadAttention(Module):
         attention = self.scaled_dot_product_attention(q, k, v)
 
         # Concatenate and return multi-headed results
-        return self.merge_heads(attention)
+        merged = self.merge_heads(attention)
+
+        # Apply final projection matrix
+        return self.w_o(merged)
 
     def split_heads(self, x):
         batch_size, seq_len, _ = x.size()
