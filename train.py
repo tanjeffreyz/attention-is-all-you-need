@@ -1,10 +1,10 @@
 import torch
 import config
 from data import Dataset
-from models import Embedding
+from models.embedding import Embedding
 
 
-dataset = Dataset(config.LANGUAGE_PAIR)
+dataset = Dataset(config.LANGUAGE_PAIR, batch_size=config.BATCH_SIZE)
 
 # Initialize model with same seed every time
 torch.manual_seed(config.SEED)
