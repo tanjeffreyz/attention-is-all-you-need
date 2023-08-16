@@ -7,15 +7,13 @@ class DecoderLayer(Module):
     def __init__(self, d_model, num_heads=8):
         super().__init__()
 
-        self.d_model = d_model
-
         self.masked_attention = MultiHeadAttention(d_model, num_heads=num_heads, use_mask=True)
         self.layer_norm1 = nn.LayerNorm(d_model)
 
         self.enc_attention = MultiHeadAttention(d_model, num_heads=num_heads)
         self.layer_norm2 = nn.LayerNorm(d_model)
 
-        self.linear = nn.Linear(self.d_model, self.d_model)
+        self.linear = nn.Linear(d_model, d_model)
         self.layer_norm3 = nn.LayerNorm(d_model)
 
     def forward(self, x, enc_out):
