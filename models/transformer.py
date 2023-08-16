@@ -1,9 +1,9 @@
 import torch
 from torch import nn
-from interfaces import Module
-from embedding import Embedding
-from encoder import EncoderLayer
-from decoder import DecoderLayer
+from .interfaces import Module
+from .embedding import Embedding
+from .encoder import EncoderLayer
+from .decoder import DecoderLayer
 
 
 class Transformer(Module):

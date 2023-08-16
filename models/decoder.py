@@ -1,7 +1,7 @@
 from torch import nn
-from interfaces import Module
-from attention import MultiHeadAttention
-from feed_forward import FeedForwardNetwork
+from .interfaces import Module
+from .attention import MultiHeadAttention
+from .feed_forward import FeedForwardNetwork
 
 
 class DecoderLayer(Module):

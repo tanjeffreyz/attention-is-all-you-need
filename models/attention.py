@@ -1,7 +1,7 @@
 import torch
 import math
 from torch import nn
-from interfaces import Module
+from .interfaces import Module
 
 
 class MultiHeadAttention(Module):
