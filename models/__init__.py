@@ -9,9 +9,13 @@ class Transformer(Module):
         super().__init__()
 
         test = MultiHeadAttention(512, 8, use_mask=True)
-        result = test(torch.rand((64, 26, 512)))
+        x = torch.rand((64, 26, 512))
+        result = test(x, x, x)
         print(result.size())
         # print(result)
+
+    def forward(self, source, target):
+        pass
 
 
 test = Transformer()

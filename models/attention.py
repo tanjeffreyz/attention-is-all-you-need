@@ -21,14 +21,14 @@ class MultiHeadAttention(Module):
         self.w_v = nn.Linear(d_model, d_model)
         self.w_o = nn.Linear(d_model, d_model)
 
-    def forward(self, x):
-        # x = (64, seq, 512)
+    def forward(self, queries, keys, values):
+        # queries, keys, values = (64, seq, 512)
         # w_q = (512, 512)
-        # x @ w_q.t = (64, seq, 512)
+        # queries @ w_q.t = (64, seq, 512)
         # split_heads = (64, 8, seq, 64)
-        q = self.split_heads(self.w_q(x))
-        k = self.split_heads(self.w_k(x))
-        v = self.split_heads(self.w_v(x))
+        q = self.split_heads(self.w_q(queries))
+        k = self.split_heads(self.w_k(keys))
+        v = self.split_heads(self.w_v(values))
 
         # Perform NUM_HEADS parallel single-head attention
         attention = self.scaled_dot_product_attention(q, k, v)
