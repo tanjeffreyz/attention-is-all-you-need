@@ -1,4 +1,3 @@
-import config
 import spacy
 from torchtext.functional import to_tensor
 from torchtext.datasets import multi30k, Multi30k

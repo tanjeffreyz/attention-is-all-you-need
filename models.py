@@ -1,23 +1,22 @@
-import config
 import torch
 from torch import nn
 
 
 class Embedding(nn.Module):
-    def __init__(self, vocab):
+    def __init__(self, vocab_len, d_model):
         super().__init__()
 
-        self.embedding = nn.Embedding(len(vocab), config.D_MODEL)
+        self.d_model = d_model
+        self.embedding = nn.Embedding(vocab_len, self.d_model)
 
-    @staticmethod
-    def positional_encoding(x):
-        result = torch.zeros((x.size(1), config.D_MODEL), dtype=torch.float)
+    def positional_encoding(self, x):
+        result = torch.zeros((x.size(1), self.d_model), dtype=torch.float)
         pos = torch.arange(0, x.size(1)).unsqueeze(1)
-        dim = torch.arange(0, config.D_MODEL)
+        dim = torch.arange(0, self.d_model)
 
         # Sine for even positions, cosine for odd positions
-        result[:, 0::2] = torch.sin(pos / (10_000 ** (dim[0::2] / config.D_MODEL)))
-        result[:, 1::2] = torch.cos(pos / (10_000 ** (dim[1::2] / config.D_MODEL)))
+        result[:, 0::2] = torch.sin(pos / (10_000 ** (dim[0::2] / self.d_model)))
+        result[:, 1::2] = torch.cos(pos / (10_000 ** (dim[1::2] / self.d_model)))
         return result
 
     def forward(self, x):

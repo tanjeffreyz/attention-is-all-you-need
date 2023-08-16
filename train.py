@@ -8,7 +8,7 @@ dataset = Dataset(config.LANGUAGE_PAIR)
 
 # Initialize model with same seed every time
 torch.manual_seed(config.SEED)
-src_embedding = Embedding(dataset.src_vocab)
+src_embedding = Embedding(len(dataset.src_vocab), config.D_MODEL)
 torch.seed()        # Reseed afterward b/c want shuffled data
 
 print(next(iter(dataset.train_loader)))
