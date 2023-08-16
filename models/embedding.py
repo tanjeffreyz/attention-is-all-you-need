@@ -4,16 +4,17 @@ from interfaces import Module
 
 
 class Embedding(Module):
-    def __init__(self, vocab_len, d_model):
+    def __init__(self, vocab_len, d_model, dropout_rate=0.1):
         super().__init__()
 
         self.d_model = d_model
         self.embedding = nn.Embedding(vocab_len, self.d_model)
+        self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
         # Embedding shape: (batch, sequence_len, d_model)
         # Positional encoding shape: (sequence_len, d_model)
-        return self.embedding(x) + self.positional_encoding(x)
+        return self.dropout(self.embedding(x) + self.positional_encoding(x))
 
     def positional_encoding(self, x):
         # result.shape = (seq_len, d_model)
