@@ -16,6 +16,6 @@ test = next(iter(dataset.train_loader))
 src = test['source']
 trg = test['target']
 print(src.size())
-print(src_embedding(src))
+print(src_embedding(src).size())
 print(' '.join(dataset.src_vocab.lookup_tokens(list(src[0]))))
 print(' '.join(dataset.trg_vocab.lookup_tokens(list(trg[0]))))

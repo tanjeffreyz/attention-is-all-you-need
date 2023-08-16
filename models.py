@@ -21,4 +21,6 @@ class Embedding(nn.Module):
         return result
 
     def forward(self, x):
+        # Embedding shape: (batch, sequence_len, d_model)
+        # Positional encoding shape: (sequence_len, d_model)
         return self.embedding(x) + self.positional_encoding(x)

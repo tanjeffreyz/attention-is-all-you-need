@@ -8,8 +8,6 @@ SEED = 20230815
 
 # Language settings
 LANGUAGE_PAIR = ('en', 'de')
-SOS = '<sos>'
-EOS = '<eos>'
 
 # Data dimensions
 BATCH_SIZE = 64
