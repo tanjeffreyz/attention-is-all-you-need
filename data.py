@@ -6,9 +6,10 @@ from torch.utils.data import DataLoader
 
 
 # Patch Multi30K dataset, PyTorch's Google Drive link is no longer active
-multi30k.URL['train'] = 'https://raw.githubusercontent.com/neychev/small_DL_repo/master/datasets/Multi30k/training.tar.gz'
-multi30k.URL['valid'] = 'https://raw.githubusercontent.com/neychev/small_DL_repo/master/datasets/Multi30k/validation.tar.gz'
-multi30k.URL['test'] = 'https://raw.githubusercontent.com/neychev/small_DL_repo/master/datasets/Multi30k/mmt16_task1_test.tar.gz'
+multi30k.URL['train'] = 'https://raw.githubusercontent.com/tanjeffreyz/pytorch-multi30k/main/training.tar.gz'
+multi30k.URL['valid'] = 'https://raw.githubusercontent.com/tanjeffreyz/pytorch-multi30k/main/validation.tar.gz'
+multi30k.URL['test'] = 'https://raw.githubusercontent.com/tanjeffreyz/pytorch-multi30k/main/mmt16_task1_test.tar.gz'
+multi30k.MD5['test'] = 'd914ec964e2c5f0534e5cdd3926cd2fe628d591dad9423c3ae953d93efdb27a6'
 
 
 class Dataset:
