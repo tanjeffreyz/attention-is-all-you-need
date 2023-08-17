@@ -5,6 +5,7 @@ from models.attention import MultiHeadAttention
 from models.encoder import EncoderLayer
 from models.decoder import DecoderLayer
 from models.feed_forward import FeedForwardNetwork
+from models.transformer import Transformer
 
 
 class TestEmbedding(unittest.TestCase):
@@ -82,6 +83,14 @@ class TestTransformer(unittest.TestCase):
         self.assertEqual(
             ffn(x).size(),
             torch.Size([64, 30, 512])
+        )
+
+    def test_transformer(self):
+        x = torch.ones((64, 30), dtype=torch.int).to(Transformer.device)
+        transformer = Transformer(512, 3000, 4000)
+        self.assertEqual(
+            transformer(x, x).size(),
+            torch.Size([64, 30, 4000])
         )
 
 
