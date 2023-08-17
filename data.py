@@ -23,6 +23,7 @@ class Dataset:
                  sos_token='<sos>',
                  eos_token='<eos>',
                  unk_token='<unk>',
+                 pad_token='<pad>',
                  columns=('source', 'target'),
                  batch_size=64):
         self.src_lang, self.trg_lang = language_pair
@@ -32,6 +33,7 @@ class Dataset:
         self.sos_token = sos_token
         self.eos_token = eos_token
         self.unk_token = unk_token
+        self.pad_token = pad_token
 
         # Load datasets
         train_data, _, test_data = Multi30k(root='data', language_pair=language_pair)
@@ -39,13 +41,13 @@ class Dataset:
         # Build vocabs from dataset
         self.src_vocab = build_vocab_from_iterator(
             map(lambda x: x[0], train_data.map(self.tokenize)),
-            specials=[self.sos_token, self.eos_token, self.unk_token]
+            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token]
         )
         self.src_vocab.set_default_index(self.src_vocab[self.unk_token])
 
         self.trg_vocab = build_vocab_from_iterator(
             map(lambda x: x[1], train_data.map(self.tokenize)),
-            specials=[self.sos_token, self.eos_token, self.unk_token]
+            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token]
         )
         self.trg_vocab.set_default_index(self.trg_vocab[self.unk_token])
 
@@ -92,7 +94,7 @@ class Dataset:
         # Pad source and target together so that all sequence lengths are equal!!!
         zipped = to_tensor(
             batch['source'] + batch['target'],
-            padding_value=self.src_vocab[self.eos_token]
+            padding_value=self.src_vocab[self.pad_token]
         )
 
         # Separate source and target sequences again
