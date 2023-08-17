@@ -86,6 +86,14 @@ class Dataset:
         should insist sequence has finished and output <eos> even if prompted further.
         """
 
-        batch['source'] = to_tensor(batch['source'], padding_value=self.src_vocab[self.eos_token])
-        batch['target'] = to_tensor(batch['target'], padding_value=self.trg_vocab[self.eos_token])
+        # Pad source and target together so that all sequence lengths are equal!!!
+        zipped = to_tensor(
+            batch['source'] + batch['target'],
+            padding_value=self.src_vocab[self.eos_token]
+        )
+
+        # Separate source and target sequences again
+        mid = zipped.size(0) // 2
+        batch['source'] = zipped[:mid]
+        batch['target'] = zipped[mid:]
         return batch
