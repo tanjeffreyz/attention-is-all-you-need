@@ -43,6 +43,9 @@ class Transformer(Module):
         # Final linear layer to project embedding to target vocab word
         self.linear = nn.Linear(d_model, trg_vocab_len)
 
+        # Move to GPU if possible
+        self.to(self.device)
+
         # Re-seed afterward to allow shuffled data
         torch.seed()
 

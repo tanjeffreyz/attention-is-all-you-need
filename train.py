@@ -13,7 +13,7 @@ model = Transformer(
     config.D_MODEL,
     len(dataset.src_vocab),
     len(dataset.trg_vocab)
-).to(Transformer.device)
+)
 
 test = next(iter(dataset.train_loader))
 src = test['source'].to(model.device)
