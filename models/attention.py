@@ -81,7 +81,7 @@ class MultiHeadAttention(Module):
         """
         if self.use_mask:
             seq_len = compatibility.size(-1)
-            mask = torch.triu(torch.ones(seq_len, seq_len) * float('-inf'), diagonal=1)
+            mask = torch.triu(torch.ones(seq_len, seq_len) * float('-inf'), diagonal=1).to(self.device)
             compatibility += mask
 
         # Apply softmax along the last dimension

@@ -29,4 +29,4 @@ class Embedding(Module):
         # Sine for even positions, cosine for odd dimensions
         result[:, 0::2] = torch.sin(pos / (10_000 ** (dim[0::2] / self.d_model)))
         result[:, 1::2] = torch.cos(pos / (10_000 ** (dim[1::2] / self.d_model)))
-        return result
+        return result.to(self.device)
