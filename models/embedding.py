@@ -26,7 +26,7 @@ class Embedding(Module):
         # dim.shape = (d_model)
         dim = torch.arange(0, self.d_model)
 
-        # Sine for even positions, cosine for odd positions
+        # Sine for even positions, cosine for odd dimensions
         result[:, 0::2] = torch.sin(pos / (10_000 ** (dim[0::2] / self.d_model)))
         result[:, 1::2] = torch.cos(pos / (10_000 ** (dim[1::2] / self.d_model)))
         return result
