@@ -46,12 +46,12 @@ if not os.path.isdir(weight_dir):
 
 # Metrics
 train_losses = np.empty((2, 0))
-test_losses = np.empty((2, 0))
+valid_losses = np.empty((2, 0))
 
 
 def save_metrics():
     np.save(os.path.join(root, 'train_losses'), train_losses)
-    np.save(os.path.join(root, 'test_losses'), test_losses)
+    np.save(os.path.join(root, 'valid_losses'), valid_losses)
 
 
 # Train
@@ -85,9 +85,9 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
         # Evaluate model
         with torch.no_grad():
             model.eval()
-            test_loss = 0
+            valid_loss = 0
             num_batches = 0
-            for data in dataset.test_loader:
+            for data in dataset.valid_loader:
                 src = data['source'].to(model.device)
                 trg = data['target'].to(model.device)
                 trg_oh = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float().to(model.device)
@@ -95,13 +95,13 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
                 predictions = model(src, trg[:, :-1])
                 loss = loss_function(predictions, trg_oh[:, 1:])
 
-                test_loss += loss.item()
+                valid_loss += loss.item()
                 num_batches += 1
                 del src, trg, trg_oh
 
-            test_loss /= num_batches
-            test_losses = np.append(test_losses, [[epoch], [test_loss]], axis=1)
-            writer.add_scalar('Loss/test', test_loss, epoch)
+            valid_loss /= num_batches
+            valid_losses = np.append(valid_losses, [[epoch], [valid_loss]], axis=1)
+            writer.add_scalar('Loss/validation', valid_loss, epoch)
 
             save_metrics()
 

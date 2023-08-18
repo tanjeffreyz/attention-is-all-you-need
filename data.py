@@ -36,7 +36,7 @@ class Dataset:
         self.pad_token = pad_token
 
         # Load datasets
-        train_data, _, test_data = Multi30k(root='data', language_pair=language_pair)
+        train_data, valid_data, test_data = Multi30k(root='data', language_pair=language_pair)
 
         # Build vocabs from dataset
         self.src_vocab = build_vocab_from_iterator(
@@ -52,24 +52,25 @@ class Dataset:
         self.trg_vocab.set_default_index(self.trg_vocab[self.unk_token])
 
         # Tokenize, encode, and batch the data
-        train_processed = (
-            train_data
-            .map(self.tokenize)
-            .map(self.encode)
-            .batch(batch_size)
-            .rows2columnar(columns)
-            .map(self.pad)
-        )
-        test_processed = (
-            test_data
-            .map(self.tokenize)
-            .map(self.encode)
-            .batch(batch_size)
-            .rows2columnar(columns)
-            .map(self.pad)
-        )
+        train_processed = self.process(train_data, batch_size, columns)
+        valid_processed = self.process(valid_data, batch_size, columns)
+        test_processed = self.process(test_data, batch_size, columns)
+
         self.train_loader = DataLoader(train_processed, batch_size=None, shuffle=True)
+        self.valid_loader = DataLoader(valid_processed, batch_size=None, shuffle=False)
         self.test_loader = DataLoader(test_processed, batch_size=None, shuffle=False)
+
+    def process(self, data, batch_size, columns):
+        """Applies the preprocessing pipeline to DATA."""
+
+        return (
+            data
+            .map(self.tokenize)
+            .map(self.encode)
+            .batch(batch_size)
+            .rows2columnar(columns)
+            .map(self.pad)
+        )
 
     def tokenize(self, pair):
         """Splits source and target sentences into tokens based on the configured language pair"""
