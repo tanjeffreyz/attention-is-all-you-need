@@ -86,7 +86,7 @@ class Transformer(Module):
             diagonal=1
         ).to(self.device)
         enc_mask = (source == self.src_pad_index)
-        dec_mask = (target == self.trg_pad_index).unsqueeze(2) | flow_mask
+        dec_mask = (target == self.trg_pad_index).unsqueeze(1) | flow_mask
 
         # Reshape to allow broadcasting to multi-headed tensors during attention
         enc_mask = enc_mask.reshape(batch, 1, 1, src_seq_len)
