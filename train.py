@@ -9,7 +9,7 @@ from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 
 
-print('[~] Training:')
+print('[~] Training')
 print(f' ~  Using device: {Transformer.device}')
 writer = SummaryWriter()
 now = datetime.now()
@@ -63,21 +63,19 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
     for data in dataset.train_loader:
         src = data['source'].to(model.device)
         trg = data['target'].to(model.device)
+        trg_oh = data['target.one_hot'].to(model.device)
 
-        # Transformer predicts probabilities
-        # Ground truth is one-hot encoding of the target vocabulary words
-        trg_one_hot = torch.nn.functional.one_hot(trg[:, 1:], len(dataset.trg_vocab)).float()
-
+        # Given the sequence length N, transformer tries to predict the N+1th token.
+        # Thus, transformer must take in trg[:-1] as input and predict trg[1:] as output.
         optimizer.zero_grad()
         predictions = model(src, trg[:, :-1])
-        print(src.size(), trg[:, :-1].size(), predictions.size())
-        loss = loss_function(predictions, trg_one_hot)
+        loss = loss_function(predictions, trg_oh[:, 1:])
         loss.backward()
         optimizer.step()
 
         train_loss += loss.item()
         num_batches += 1
-        del src, trg, trg_one_hot
+        del src, trg, trg_oh
 
     train_loss /= num_batches
     train_losses = np.append(train_losses, [[epoch], [train_loss]], axis=1)
@@ -91,18 +89,19 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
             for data in dataset.test_loader:
                 src = data['source'].to(model.device)
                 trg = data['target'].to(model.device)
-                trg_one_hot = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float()
+                trg_oh = data['target.one_hot'].to(model.device)
 
-                predictions = model(src, trg)
-                loss = loss_function(predictions, trg_one_hot)
+                predictions = model(src, trg[:, :-1])
+                loss = loss_function(predictions, trg_oh[:, 1:])
 
                 test_loss += loss.item()
                 num_batches += 1
-                del src, trg, trg_one_hot
+                del src, trg, trg_oh
 
             test_loss /= num_batches
             test_losses = np.append(test_losses, [[epoch], [test_loss]], axis=1)
             writer.add_scalar('Loss/test', test_loss, epoch)
+
             save_metrics()
 
 save_metrics()
