@@ -68,7 +68,7 @@ class MultiHeadAttention(Module):
 
         """
         Use lower-triangular mask to prevent leftward information flow
-        Fill lower triangle with negative infinity to zero out those values during softmax
+        Fill upper triangle with negative infinity to zero out those values during softmax
 
         seq     weights      values          output
         0       [1 0 0]   [ --- a --- ]   [ a + 0 + 0 ]
