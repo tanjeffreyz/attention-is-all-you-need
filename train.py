@@ -63,19 +63,25 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
     for data in dataset.train_loader:
         src = data['source'].to(model.device)
         trg = data['target'].to(model.device)
-        trg_oh = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float().to(model.device)
 
         # Given the sequence length N, transformer tries to predict the N+1th token.
         # Thus, transformer must take in trg[:-1] as input and predict trg[1:] as output.
         optimizer.zero_grad()
         predictions = model(src, trg[:, :-1])
-        loss = loss_function(predictions, trg_oh[:, 1:])
+
+        # For CrossEntropyLoss, need to reshape input from (batch, seq_len, vocab_len)
+        # to (batch * seq_len, vocab_len). Also need to reshape ground truth from
+        # (batch, seq_len) to just (batch * seq_len)
+        loss = loss_function(
+            predictions.reshape(-1, predictions.size(-1)),
+            trg[:, 1:].reshape(-1)
+        )
         loss.backward()
         optimizer.step()
 
         train_loss += loss.item()
         num_batches += 1
-        del src, trg, trg_oh
+        del src, trg
 
     train_loss /= num_batches
     train_losses = np.append(train_losses, [[epoch], [train_loss]], axis=1)
@@ -90,14 +96,17 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
             for data in dataset.valid_loader:
                 src = data['source'].to(model.device)
                 trg = data['target'].to(model.device)
-                trg_oh = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float().to(model.device)
 
                 predictions = model(src, trg[:, :-1])
-                loss = loss_function(predictions, trg_oh[:, 1:])
+
+                loss = loss_function(
+                    predictions.reshape(-1, predictions.size(-1)),
+                    trg[:, 1:].reshape(-1)
+                )
 
                 valid_loss += loss.item()
                 num_batches += 1
-                del src, trg, trg_oh
+                del src, trg
 
             valid_loss /= num_batches
             valid_losses = np.append(valid_losses, [[epoch], [valid_loss]], axis=1)
