@@ -4,7 +4,7 @@ from .interfaces import Module
 
 
 class Embedding(Module):
-    def __init__(self, vocab_len, d_model, pad_index, dropout_rate=0.1):
+    def __init__(self, d_model, vocab_len, pad_index, dropout_rate=0.1):
         super().__init__()
 
         self.d_model = d_model

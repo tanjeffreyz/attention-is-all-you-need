@@ -23,8 +23,14 @@ class Transformer(Module):
         torch.manual_seed(seed)
 
         # Embeddings, pass in pad indices to prevent <pad> from contributing to gradient
-        self.src_embedding = Embedding(src_vocab_len, d_model, src_pad_index)
-        self.trg_embedding = Embedding(trg_vocab_len, d_model, trg_pad_index)
+        self.src_embedding = Embedding(d_model,
+                                       src_vocab_len,
+                                       src_pad_index,
+                                       dropout_rate=dropout_rate)
+        self.trg_embedding = Embedding(d_model,
+                                       trg_vocab_len,
+                                       trg_pad_index,
+                                       dropout_rate=dropout_rate)
 
         # Encoder
         self.encoder = nn.Sequential(
