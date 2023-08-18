@@ -9,16 +9,16 @@ class DecoderLayer(Module):
         super().__init__()
 
         self.self_attention = MultiHeadAttention(d_model, num_heads=num_heads)
-        self.layer_norm1 = nn.LayerNorm(d_model)
         self.dropout1 = nn.Dropout(p=dropout_rate)
+        self.layer_norm1 = nn.LayerNorm(d_model)
 
         self.enc_attention = MultiHeadAttention(d_model, num_heads=num_heads)
-        self.layer_norm2 = nn.LayerNorm(d_model)
         self.dropout2 = nn.Dropout(p=dropout_rate)
+        self.layer_norm2 = nn.LayerNorm(d_model)
 
         self.ffn = FeedForwardNetwork(d_model)
-        self.layer_norm3 = nn.LayerNorm(d_model)
         self.dropout3 = nn.Dropout(p=dropout_rate)
+        self.layer_norm3 = nn.LayerNorm(d_model)
 
     def forward(self, x, enc_out, enc_mask, dec_mask):
         # Multi-headed attention and residual connection + layer norm

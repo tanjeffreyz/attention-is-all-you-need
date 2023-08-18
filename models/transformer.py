@@ -36,7 +36,7 @@ class Transformer(Module):
                                        dropout_rate=dropout_rate)
 
         # Encoder
-        self.encoder_layers = nn.ModuleList(
+        self.encoder_stack = nn.ModuleList(
             [EncoderLayer(d_model,
                           num_heads=num_heads,
                           dropout_rate=dropout_rate)
@@ -44,7 +44,7 @@ class Transformer(Module):
         )
 
         # Decoder
-        self.decoder_layers = nn.ModuleList(
+        self.decoder_stack = nn.ModuleList(
             [DecoderLayer(d_model,
                           num_heads=num_heads,
                           dropout_rate=dropout_rate)
@@ -94,12 +94,12 @@ class Transformer(Module):
 
         # Encoder stack
         enc_out = self.src_embedding(source)
-        for layer in self.encoder_layers:
+        for layer in self.encoder_stack:
             enc_out = layer(enc_out, enc_mask)
 
         # Decoder stack
         dec_out = self.trg_embedding(target)
-        for layer in self.decoder_layers:
+        for layer in self.decoder_stack:
             dec_out = layer(dec_out, enc_out, enc_mask, dec_mask)
 
         # Final linear layer + softmax to get word probabilities
