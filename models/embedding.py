@@ -19,7 +19,6 @@ class Embedding(Module):
     def positional_encoding(self, x):
         # result.shape = (seq_len, d_model)
         result = torch.zeros((x.size(1), self.d_model), dtype=torch.float)
-        result.requires_grad = False
 
         # pos.shape = (seq_len, 1)
         pos = torch.arange(0, x.size(1)).unsqueeze(1)
