@@ -63,7 +63,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
     for data in dataset.train_loader:
         src = data['source'].to(model.device)
         trg = data['target'].to(model.device)
-        trg_oh = data['target.one_hot'].to(model.device)
+        trg_oh = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float().to(model.device)
 
         # Given the sequence length N, transformer tries to predict the N+1th token.
         # Thus, transformer must take in trg[:-1] as input and predict trg[1:] as output.
@@ -89,7 +89,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
             for data in dataset.test_loader:
                 src = data['source'].to(model.device)
                 trg = data['target'].to(model.device)
-                trg_oh = data['target.one_hot'].to(model.device)
+                trg_oh = torch.nn.functional.one_hot(trg, len(dataset.trg_vocab)).float().to(model.device)
 
                 predictions = model(src, trg[:, :-1])
                 loss = loss_function(predictions, trg_oh[:, 1:])

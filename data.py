@@ -1,4 +1,3 @@
-import torch
 import spacy
 from torchtext.functional import to_tensor
 from torchtext.datasets import multi30k, Multi30k
@@ -60,7 +59,6 @@ class Dataset:
             .batch(batch_size)
             .rows2columnar(columns)
             .map(self.pad)
-            .map(self.one_hot)
         )
         test_processed = (
             test_data
@@ -69,7 +67,6 @@ class Dataset:
             .batch(batch_size)
             .rows2columnar(columns)
             .map(self.pad)
-            .map(self.one_hot)
         )
         self.train_loader = DataLoader(train_processed, batch_size=None, shuffle=True)
         self.test_loader = DataLoader(test_processed, batch_size=None, shuffle=False)
@@ -104,13 +101,4 @@ class Dataset:
         mid = zipped.size(0) // 2
         batch['source'] = zipped[:mid]
         batch['target'] = zipped[mid:]
-        return batch
-
-    def one_hot(self, batch):
-        """
-        One-hot encodes all target sequences for use in the loss function.
-        This is necessary because Transformer predicts a probability distribution.
-        """
-
-        batch['target.one_hot'] = torch.nn.functional.one_hot(batch['target'], len(self.trg_vocab)).float()
         return batch
