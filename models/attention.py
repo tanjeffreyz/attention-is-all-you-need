@@ -5,12 +5,11 @@ from .interfaces import Module
 
 
 class MultiHeadAttention(Module):
-    def __init__(self, d_model, num_heads=8, use_mask=False):
+    def __init__(self, d_model, num_heads=8):
         super().__init__()
 
         self.d_model = d_model
         self.num_heads = num_heads
-        self.use_mask = use_mask
         assert d_model % num_heads == 0, 'D_MODEL must be divisible by NUM_HEADS'
 
         # w_q_i projects D_MODEL to D_MODEL / NUM_HEADS. However, there are
@@ -23,7 +22,7 @@ class MultiHeadAttention(Module):
 
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, queries, keys, values):
+    def forward(self, queries, keys, values, mask=None):
         # queries, keys, values = (batch, seq, 512)
         # w_q = (512, 512)
         # queries @ w_q.t = (batch, seq, 512)
@@ -33,7 +32,7 @@ class MultiHeadAttention(Module):
         v = self.split_heads(self.w_v(values))
 
         # Perform NUM_HEADS parallel single-head attention
-        attention = self.scaled_dot_product_attention(q, k, v)
+        attention = self.scaled_dot_product_attention(q, k, v, mask=mask)
 
         # Concatenate and return multi-headed results
         # (batch, 8, seq, 64) -> (batch, seq, 512)
@@ -64,28 +63,14 @@ class MultiHeadAttention(Module):
         # Merge last two dimensions
         return transposed.reshape(batch_size, seq_len, self.d_model)
 
-    def scaled_dot_product_attention(self, q, k, v):
+    def scaled_dot_product_attention(self, q, k, v, mask=None):
         # Inputs are size (batch, num_heads, seq, d_model/num_heads)
         d_k = self.d_model // self.num_heads
         compatibility = torch.matmul(q, k.transpose(2, 3)) / math.sqrt(d_k)
 
-        """
-        Use lower-triangular mask to prevent leftward information flow
-        Fill upper triangle with negative infinity to zero out those values during softmax
-
-        seq     weights      values          output
-        0       [1 0 0]   [ --- a --- ]   [ a + 0 + 0 ]
-        1       [1 1 0] * [ --- b --- ] = [ a + b + 0 ]
-        2       [1 1 1]   [ --- c --- ]   [ a + b + c ]
-
-        At seq=0, can only attend to seq=0
-        At seq=1, can attend to both seq=0 and seq=1
-        And so on...
-        """
-        if self.use_mask:
-            seq_len = compatibility.size(-1)
-            mask = torch.triu(torch.ones(seq_len, seq_len) * float('-inf'), diagonal=1).to(self.device)
-            compatibility += mask
+        # Apply mask
+        if mask is not None:
+            compatibility = torch.masked_fill(compatibility, mask, float('-inf'))
 
         # Apply softmax along the last dimension
         value_weights = self.softmax(compatibility)
