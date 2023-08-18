@@ -59,7 +59,7 @@ print()
 for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
     model.train()
     train_loss = 0
-    num_batches = 0     # Using DataPipe, cannot retrieve length beforehand
+    num_batches = 0     # Using DataPipe, cannot use len() to get number of batches
     for data in dataset.train_loader:
         src = data['source'].to(model.device)
         trg = data['target'].to(model.device)
@@ -82,6 +82,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
     writer.add_scalar('Loss/train', train_loss, epoch)
 
     if epoch % 10 == 0:
+        # Evaluate model
         with torch.no_grad():
             model.eval()
             test_loss = 0
