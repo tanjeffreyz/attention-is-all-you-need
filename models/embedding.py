@@ -4,11 +4,11 @@ from .interfaces import Module
 
 
 class Embedding(Module):
-    def __init__(self, vocab_len, d_model, dropout_rate=0.1):
+    def __init__(self, vocab_len, d_model, pad_index, dropout_rate=0.1):
         super().__init__()
 
         self.d_model = d_model
-        self.embedding = nn.Embedding(vocab_len, self.d_model)
+        self.embedding = nn.Embedding(vocab_len, self.d_model, padding_idx=pad_index)
         self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
@@ -19,6 +19,7 @@ class Embedding(Module):
     def positional_encoding(self, x):
         # result.shape = (seq_len, d_model)
         result = torch.zeros((x.size(1), self.d_model), dtype=torch.float)
+        result.requires_grad = False
 
         # pos.shape = (seq_len, 1)
         pos = torch.arange(0, x.size(1)).unsqueeze(1)

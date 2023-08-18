@@ -11,6 +11,8 @@ class Transformer(Module):
                  d_model,
                  src_vocab_len,
                  trg_vocab_len,
+                 src_pad_index,
+                 trg_pad_index,
                  num_heads=8,
                  num_layers=6,
                  dropout_rate=0.1,
@@ -20,9 +22,9 @@ class Transformer(Module):
         # Manually seed to keep embeddings consistent across loads
         torch.manual_seed(seed)
 
-        # Embeddings
-        self.src_embedding = Embedding(src_vocab_len, d_model)
-        self.trg_embedding = Embedding(trg_vocab_len, d_model)
+        # Embeddings, pass in pad indices to prevent <pad> from contributing to gradient
+        self.src_embedding = Embedding(src_vocab_len, d_model, src_pad_index)
+        self.trg_embedding = Embedding(trg_vocab_len, d_model, trg_pad_index)
 
         # Encoder
         self.encoder = nn.Sequential(

@@ -19,7 +19,9 @@ dataset = Dataset(config.LANGUAGE_PAIR, batch_size=config.BATCH_SIZE)
 model = Transformer(
     config.D_MODEL,
     len(dataset.src_vocab),
-    len(dataset.trg_vocab)
+    len(dataset.trg_vocab),
+    dataset.src_vocab[dataset.pad_token],
+    dataset.trg_vocab[dataset.pad_token]
 )
 
 print(f' ~  Parameter count: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')
