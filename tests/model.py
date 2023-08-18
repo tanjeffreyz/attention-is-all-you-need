@@ -11,18 +11,18 @@ from models.transformer import Transformer
 class TestEmbedding(unittest.TestCase):
     def test_embedding(self):
         tokens = torch.ones((64, 30), dtype=torch.int).to(Embedding.device)
-        embedding = Embedding(3000, 512).to(Embedding.device)
+        embedding = Embedding(512, 3000, 0).to(Embedding.device)
         self.assertEqual(
-            embedding(tokens).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            embedding(tokens).size()
         )
 
     def test_positional_encoding(self):
         tokens = torch.ones((64, 30), dtype=torch.int).to(Embedding.device)
-        embedding = Embedding(3000, 512).to(Embedding.device)
+        embedding = Embedding(512, 3000, 0).to(Embedding.device)
         self.assertEqual(
-            embedding.positional_encoding(tokens).size(),
-            torch.Size([30, 512])
+            torch.Size([30, 512]),
+            embedding.positional_encoding(tokens).size()
         )
 
 
@@ -31,32 +31,32 @@ class TestAttention(unittest.TestCase):
         x = torch.rand((64, 8, 30, 64))
         attention = MultiHeadAttention(512)
         self.assertEqual(
-            attention.scaled_dot_product_attention(x, x, x).size(),
-            torch.Size([64, 8, 30, 64])
+            torch.Size([64, 8, 30, 64]),
+            attention.scaled_dot_product_attention(x, x, x).size()
         )
 
     def test_multi_head_attention(self):
         x = torch.rand((64, 30, 512))
         attention = MultiHeadAttention(512)
         self.assertEqual(
-            attention(x, x, x).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            attention(x, x, x).size()
         )
 
     def test_split_heads(self):
         x = torch.rand((64, 30, 512))
         attention = MultiHeadAttention(512)
         self.assertEqual(
-            attention.split_heads(x).size(),
-            torch.Size([64, 8, 30, 64])
+            torch.Size([64, 8, 30, 64]),
+            attention.split_heads(x).size()
         )
 
     def test_merge_heads(self):
         x = torch.rand((64, 8, 30, 64))
         attention = MultiHeadAttention(512)
         self.assertEqual(
-            attention.merge_heads(x).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            attention.merge_heads(x).size()
         )
 
 
@@ -64,33 +64,36 @@ class TestTransformer(unittest.TestCase):
     def test_encoder_layer(self):
         x = torch.rand((64, 30, 512))
         encoder = EncoderLayer(512)
+        enc_mask = torch.zeros((64, 1, 1, 30), dtype=torch.bool)
         self.assertEqual(
-            encoder(x).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            encoder(x, enc_mask).size()
         )
 
     def test_decoder_layer(self):
         x = torch.rand((64, 30, 512)).to(DecoderLayer.device)
         decoder = DecoderLayer(512).to(DecoderLayer.device)
+        enc_mask = torch.zeros((64, 1, 1, 30), dtype=torch.bool).to(DecoderLayer.device)
+        dec_mask = torch.zeros((64, 1, 30, 30), dtype=torch.bool).to(DecoderLayer.device)
         self.assertEqual(
-            decoder(x, x).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            decoder(x, x, enc_mask, dec_mask).size()
         )
 
     def test_feed_forward_network(self):
         x = torch.rand((64, 30, 512))
         ffn = FeedForwardNetwork(512)
         self.assertEqual(
-            ffn(x).size(),
-            torch.Size([64, 30, 512])
+            torch.Size([64, 30, 512]),
+            ffn(x).size()
         )
 
     def test_transformer(self):
         x = torch.ones((64, 30), dtype=torch.int).to(Transformer.device)
-        transformer = Transformer(512, 3000, 4000)
+        transformer = Transformer(512, 3000, 4000, src_pad_index=0, trg_pad_index=0)
         self.assertEqual(
-            transformer(x, x).size(),
-            torch.Size([64, 30, 4000])
+            torch.Size([64, 30, 4000]),
+            transformer(x, x).size()
         )
 
 
