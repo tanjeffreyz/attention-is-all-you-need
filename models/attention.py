@@ -21,11 +21,13 @@ class MultiHeadAttention(Module):
         self.w_v = nn.Linear(d_model, d_model)
         self.w_o = nn.Linear(d_model, d_model)
 
+        self.softmax = nn.Softmax(dim=-1)
+
     def forward(self, queries, keys, values):
-        # queries, keys, values = (64, seq, 512)
+        # queries, keys, values = (batch, seq, 512)
         # w_q = (512, 512)
-        # queries @ w_q.t = (64, seq, 512)
-        # split_heads = (64, 8, seq, 64)
+        # queries @ w_q.t = (batch, seq, 512)
+        # split_heads = (batch, 8, seq, 64)
         q = self.split_heads(self.w_q(queries))
         k = self.split_heads(self.w_k(keys))
         v = self.split_heads(self.w_v(values))
@@ -34,6 +36,7 @@ class MultiHeadAttention(Module):
         attention = self.scaled_dot_product_attention(q, k, v)
 
         # Concatenate and return multi-headed results
+        # (batch, 8, seq, 64) -> (batch, seq, 512)
         merged = self.merge_heads(attention)
 
         # Apply final projection matrix
@@ -52,7 +55,7 @@ class MultiHeadAttention(Module):
 
     def merge_heads(self, x):
         # Concatenate multi-headed results back into shape (batch, seq, d_model)
-        # This is essentially the inverse of split_heads
+        # This is the inverse of split_heads
         batch_size, _, seq_len, _ = x.size()
 
         # Switch back to shape (batch, seq, num_heads, d_model)
@@ -85,7 +88,7 @@ class MultiHeadAttention(Module):
             compatibility += mask
 
         # Apply softmax along the last dimension
-        value_weights = torch.softmax(compatibility, dim=-1)
+        value_weights = self.softmax(compatibility)
 
         # Weight values by softmax results
         return torch.matmul(value_weights, v)

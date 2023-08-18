@@ -40,8 +40,9 @@ class Transformer(Module):
              for _ in range(num_layers)]
         )
 
-        # Final linear layer to project embedding to target vocab word
+        # Final layer to project embedding to target vocab word probability distribution
         self.linear = nn.Linear(d_model, trg_vocab_len)
+        self.softmax = nn.Softmax(dim=-1)
 
         # Move to GPU if possible
         self.to(self.device)
@@ -60,4 +61,4 @@ class Transformer(Module):
             dec_out = layer(dec_out, enc_out)
 
         # Final linear layer + softmax to get word probabilities
-        return torch.softmax(self.linear(dec_out), dim=-1)
+        return self.softmax(self.linear(dec_out))

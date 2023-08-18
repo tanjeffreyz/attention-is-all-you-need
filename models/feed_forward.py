@@ -1,4 +1,3 @@
-import torch
 from torch import nn
 from .interfaces import Module
 
@@ -8,7 +7,8 @@ class FeedForwardNetwork(Module):
         super().__init__()
 
         self.linear1 = nn.Linear(d_model, d_ff)
+        self.relu = nn.ReLU()
         self.linear2 = nn.Linear(d_ff, d_model)
 
     def forward(self, x):
-        return self.linear2(torch.relu(self.linear1(x)))
+        return self.linear2(self.relu(self.linear1(x)))
