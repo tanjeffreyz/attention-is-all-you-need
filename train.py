@@ -1,6 +1,7 @@
 import torch
 import config
 import os
+import atexit
 from data import Dataset
 from models import Transformer
 from tqdm import tqdm
@@ -48,6 +49,12 @@ def append_loss(file_name, epoch, loss):
     with open(os.path.join(root, file_name), 'a') as file:
         file.write(f'{epoch}, {loss}\n')
 
+
+# Save model whenever program terminates, just in case of crash
+atexit.register(lambda: torch.save(
+    model.state_dict(),
+    os.path.join(weight_dir, f'{epoch:04}')
+))
 
 # Train
 print()
@@ -106,5 +113,3 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
             valid_loss /= num_batches
             writer.add_scalar('Loss/valid', valid_loss, epoch)
             append_loss('valid.csv', epoch, valid_loss)
-
-torch.save(model.state_dict(), os.path.join(weight_dir, 'final'))
