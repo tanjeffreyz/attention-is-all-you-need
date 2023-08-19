@@ -72,4 +72,5 @@ class Transformer(Module):
             dec_out = layer(dec_out, enc_out)
 
         # Final linear layer to get word probabilities
+        # DO NOT apply softmax here, as CrossEntropyLoss already does normalization!!!
         return self.linear(dec_out)
