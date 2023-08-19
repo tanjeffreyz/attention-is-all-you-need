@@ -62,45 +62,15 @@ class Transformer(Module):
         torch.seed()
 
     def forward(self, source, target):
-        """
-        Use lower-triangular mask to prevent leftward information flow
-        Fill upper triangle with negative infinity to zero out those values during softmax
-
-        seq     weights      values          output
-        0       [1 0 0]   [ --- a --- ]   [ a + 0 + 0 ]
-        1       [1 1 0] * [ --- b --- ] = [ a + b + 0 ]
-        2       [1 1 1]   [ --- c --- ]   [ a + b + c ]
-
-        At seq=0, can only attend to seq=0
-        At seq=1, can attend to both seq=0 and seq=1
-        And so on...
-        """
-
-        # Generate masks
-        batch = source.size(0)
-        src_seq_len = source.size(-1)
-        trg_seq_len = target.size(-1)
-
-        flow_mask = torch.triu(     # Prevents leftward flow of information in target seq
-            torch.ones(trg_seq_len, trg_seq_len, dtype=torch.bool, requires_grad=False),
-            diagonal=1
-        ).to(self.device)
-        enc_mask = (source == self.src_pad_index)
-        dec_mask = (target == self.trg_pad_index).unsqueeze(1) | flow_mask
-
-        # Reshape to allow broadcasting to multi-headed tensors during attention
-        enc_mask = enc_mask.reshape(batch, 1, 1, src_seq_len)
-        dec_mask = dec_mask.reshape(batch, 1, trg_seq_len, trg_seq_len)
-
         # Encoder stack
         enc_out = self.src_embedding(source)
         for layer in self.encoder_stack:
-            enc_out = layer(enc_out, enc_mask)
+            enc_out = layer(enc_out)
 
         # Decoder stack
         dec_out = self.trg_embedding(target)
         for layer in self.decoder_stack:
-            dec_out = layer(dec_out, enc_out, enc_mask, dec_mask)
+            dec_out = layer(dec_out, enc_out)
 
         # Final linear layer + softmax to get word probabilities
         return self.softmax(self.linear(dec_out))

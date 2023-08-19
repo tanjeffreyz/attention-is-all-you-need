@@ -16,10 +16,10 @@ class EncoderLayer(Module):
         self.dropout2 = nn.Dropout(p=dropout_rate)
         self.layer_norm2 = nn.LayerNorm(d_model)
 
-    def forward(self, x, enc_mask):
+    def forward(self, x):
         # Multi-headed attention and residual connection + layer norm
         # Dropout is applied to sub-layer output, before residual and norm
-        attention_out = self.self_attention(queries=x, keys=x, values=x, mask=enc_mask)
+        attention_out = self.self_attention(queries=x, keys=x, values=x)
         x = self.layer_norm1(x + self.dropout1(attention_out))
 
         # Feed-forward network and another residual + layer norm
