@@ -1,37 +1,15 @@
 import torch
 import config
 import os
-import atexit
 import seaborn as sns
 from data import Dataset
 from modules import Transformer
-from tqdm import tqdm
-from datetime import datetime
-from torch.utils.tensorboard import SummaryWriter
 from matplotlib import pyplot as plt
+from utils.experiment import Experiment
 
 
 print('[~] Training')
 print(f' ~  Using device: {Transformer.device}')
-writer = SummaryWriter()
-now = datetime.now()
-
-# Set up experiment folder structure
-root = os.path.join(
-    'experiments',
-    '-'.join(config.LANGUAGE_PAIR),
-    now.strftime('%m_%d_%Y'),
-    now.strftime('%H_%M_%S')
-)
-weight_dir = os.path.join(root, 'weights')
-if not os.path.isdir(weight_dir):
-    os.makedirs(weight_dir)
-
-
-def append_loss(file_name, epoch, loss):
-    with open(os.path.join(root, file_name), 'a') as file:
-        file.write(f'{epoch}, {loss}\n')
-
 
 # Download and preprocess data
 dataset = Dataset(config.LANGUAGE_PAIR, batch_size=config.BATCH_SIZE)
@@ -46,6 +24,9 @@ model = Transformer(
 )
 
 print(f' ~  Parameter count: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')
+
+# Set up experiment
+experiment = Experiment(model, category='-'.join(config.LANGUAGE_PAIR))
 
 # Optimizer
 optimizer = torch.optim.Adam(
@@ -68,20 +49,14 @@ ax = sns.lineplot(
     y=[get_lr(x) for x in range(config.NUM_EPOCHS)]
 )
 ax.set(xlabel='Epoch', ylabel='Learning Rate', title='Learning Rate Schedule')
-plt.savefig(os.path.join(root, 'lr_schedule.png'))
+plt.savefig(os.path.join(experiment.path, 'lr_schedule.png'))
 
 # Cross entropy loss
 loss_function = torch.nn.CrossEntropyLoss()
 
-# Save model whenever program terminates, just in case of crash
-atexit.register(lambda: torch.save(
-    model.state_dict(),
-    os.path.join(weight_dir, f'{epoch:04}')
-))
 
 # Train
-print()
-for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
+def train(epoch):
     model.train()
     train_loss = 0
     num_batches = 0     # Using DataPipe, cannot use len() to get number of batches
@@ -109,8 +84,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
         del src, trg
 
     train_loss /= num_batches
-    writer.add_scalar('Loss/train', train_loss, epoch)
-    append_loss('train.csv', epoch, train_loss)
+    experiment.append_loss('train', epoch, train_loss)
 
     if epoch % 10 == 0:
         # Evaluate model
@@ -134,5 +108,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
                 del src, trg
 
             valid_loss /= num_batches
-            writer.add_scalar('Loss/valid', valid_loss, epoch)
-            append_loss('valid.csv', epoch, valid_loss)
+            experiment.append_loss('validation', epoch, train_loss)
+
+
+experiment.loop(config.NUM_EPOCHS, train)
