@@ -2,36 +2,19 @@ import torch
 import config
 import os
 import atexit
+import seaborn as sns
 from data import Dataset
-from models import Transformer
+from modules import Transformer
 from tqdm import tqdm
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
+from matplotlib import pyplot as plt
 
 
 print('[~] Training')
 print(f' ~  Using device: {Transformer.device}')
 writer = SummaryWriter()
 now = datetime.now()
-
-dataset = Dataset(config.LANGUAGE_PAIR, batch_size=config.BATCH_SIZE)
-
-model = Transformer(
-    config.D_MODEL,
-    len(dataset.src_vocab),
-    len(dataset.trg_vocab),
-    dataset.src_vocab[dataset.pad_token],
-    dataset.trg_vocab[dataset.pad_token]
-)
-
-print(f' ~  Parameter count: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')
-
-optimizer = torch.optim.Adam(
-    model.parameters(),
-    lr=config.LEARNING_RATE
-)
-
-loss_function = torch.nn.CrossEntropyLoss()
 
 # Set up experiment folder structure
 root = os.path.join(
@@ -49,6 +32,46 @@ def append_loss(file_name, epoch, loss):
     with open(os.path.join(root, file_name), 'a') as file:
         file.write(f'{epoch}, {loss}\n')
 
+
+# Download and preprocess data
+dataset = Dataset(config.LANGUAGE_PAIR, batch_size=config.BATCH_SIZE)
+
+# Initialize model
+model = Transformer(
+    config.D_MODEL,
+    len(dataset.src_vocab),
+    len(dataset.trg_vocab),
+    dataset.src_vocab[dataset.pad_token],
+    dataset.trg_vocab[dataset.pad_token]
+)
+
+print(f' ~  Parameter count: {sum(p.numel() for p in model.parameters() if p.requires_grad)}')
+
+# Optimizer
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=config.LEARNING_RATE,
+    betas=(config.BETA1, config.BETA2),
+    eps=config.EPS
+)
+
+
+# LR Scheduler
+def get_lr(x):
+    x += 1      # x is originally zero-indexed
+    return (config.D_MODEL ** (-0.5)) * min(x ** (-0.5), x * (config.NUM_WARMUP ** (-1.5)))
+
+
+scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, get_lr)
+ax = sns.lineplot(
+    x=range(config.NUM_EPOCHS),
+    y=[get_lr(x) for x in range(config.NUM_EPOCHS)]
+)
+ax.set(xlabel='Epoch', ylabel='Learning Rate', title='Learning Rate Schedule')
+plt.savefig(os.path.join(root, 'lr_schedule.png'))
+
+# Cross entropy loss
+loss_function = torch.nn.CrossEntropyLoss()
 
 # Save model whenever program terminates, just in case of crash
 atexit.register(lambda: torch.save(

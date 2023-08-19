@@ -1,11 +1,11 @@
 import unittest
 import torch
-from models.embedding import Embedding
-from models.attention import MultiHeadAttention
-from models.encoder import EncoderLayer
-from models.decoder import DecoderLayer
-from models.feed_forward import FeedForwardNetwork
-from models.transformer import Transformer
+from modules.embedding import Embedding
+from modules.attention import MultiHeadAttention
+from modules.encoder import EncoderLayer
+from modules.decoder import DecoderLayer
+from modules.feed_forward import FeedForwardNetwork
+from modules.transformer import Transformer
 
 
 class TestEmbedding(unittest.TestCase):
