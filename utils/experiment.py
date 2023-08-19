@@ -13,7 +13,7 @@ class Experiment:
                  category: str | list[str] = None,
                  root: str = 'experiments'):
         self.model = model
-        self.writer = SummaryWriter(log_dir='.runs')
+        self.writer = SummaryWriter()
 
         # Set up folder structure
         now = datetime.now()
@@ -43,18 +43,23 @@ class Experiment:
 
         self.writer.flush()
 
-    def append_loss(self, loss_type, epoch, loss):
-        """Appends loss for this epoch to its corresponding .csv file"""
+    def add_scalar(self, name, step, value):
+        """Appends scalar for this step to its corresponding .csv file"""
 
-        loss_type = loss_type.lower()
-        assert loss_type in {'train', 'validation'}
+        name, _ = os.path.splitext(name)
 
         # Write to Tensorboard
-        self.writer.add_scalar(f'Loss/{loss_type}', loss, epoch)
+        self.writer.add_scalar(name, value, step)
+
+        # Re-group path b/c name might be a nested path
+        folder, file_name = os.path.split(os.path.join(self.path, f'{name}.csv'))
+        folder = folder.lower()
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
 
         # Append to .csv file
-        with open(os.path.join(self.path, f'{loss_type}_loss.csv'), 'a') as file:
-            file.write(f'{epoch}, {loss}\n')
+        with open(os.path.join(folder, file_name), 'a') as file:
+            file.write(f'{step}, {value}\n')
 
     def save_model(self, file_name):
         """Saves model weights to the weights directory under FILE_NAME."""

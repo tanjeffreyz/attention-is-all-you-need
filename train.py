@@ -78,37 +78,42 @@ def train(epoch):
         )
         loss.backward()
         optimizer.step()
+        scheduler.step()
 
         train_loss += loss.item()
         num_batches += 1
         del src, trg
 
     train_loss /= num_batches
-    experiment.append_loss('train', epoch, train_loss)
+    experiment.add_scalar('loss/train', epoch, train_loss)
 
     if epoch % 10 == 0:
-        # Evaluate model
-        with torch.no_grad():
-            model.eval()
-            valid_loss = 0
-            num_batches = 0
-            for data in dataset.valid_loader:
-                src = data['source'].to(model.device)
-                trg = data['target'].to(model.device)
+        validate(epoch)
 
-                predictions = model(src, trg[:, :-1])
 
-                loss = loss_function(
-                    predictions.reshape(-1, predictions.size(-1)),
-                    trg[:, 1:].reshape(-1)
-                )
+# Evaluate against validation set and calculate BLEU
+def validate(epoch):
+    with torch.no_grad():
+        model.eval()
+        valid_loss = 0
+        num_batches = 0
+        for data in dataset.valid_loader:
+            src = data['source'].to(model.device)
+            trg = data['target'].to(model.device)
 
-                valid_loss += loss.item()
-                num_batches += 1
-                del src, trg
+            predictions = model(src, trg[:, :-1])
 
-            valid_loss /= num_batches
-            experiment.append_loss('validation', epoch, train_loss)
+            loss = loss_function(
+                predictions.reshape(-1, predictions.size(-1)),
+                trg[:, 1:].reshape(-1)
+            )
+
+            valid_loss += loss.item()
+            num_batches += 1
+            del src, trg
+
+        valid_loss /= num_batches
+        experiment.add_scalar('loss/validation', epoch, valid_loss)
 
 
 experiment.loop(config.NUM_EPOCHS, train)
