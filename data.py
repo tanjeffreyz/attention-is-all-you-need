@@ -41,15 +41,13 @@ class Dataset:
         # Build vocabs from dataset
         self.src_vocab = build_vocab_from_iterator(
             map(lambda x: x[0], train_data.map(self.tokenize)),
-            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token],
-            min_freq=2
+            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token]
         )
         self.src_vocab.set_default_index(self.src_vocab[self.unk_token])
 
         self.trg_vocab = build_vocab_from_iterator(
             map(lambda x: x[1], train_data.map(self.tokenize)),
-            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token],
-            min_freq=2
+            specials=[self.sos_token, self.eos_token, self.unk_token, self.pad_token]
         )
         self.trg_vocab.set_default_index(self.trg_vocab[self.unk_token])
 
