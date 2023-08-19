@@ -1,7 +1,6 @@
 import torch
 import config
 import os
-import numpy as np
 from data import Dataset
 from models import Transformer
 from tqdm import tqdm
@@ -44,14 +43,10 @@ weight_dir = os.path.join(root, 'weights')
 if not os.path.isdir(weight_dir):
     os.makedirs(weight_dir)
 
-# Metrics
-train_losses = np.empty((2, 0))
-valid_losses = np.empty((2, 0))
 
-
-def save_metrics():
-    np.save(os.path.join(root, 'train_losses'), train_losses)
-    np.save(os.path.join(root, 'valid_losses'), valid_losses)
+def append_loss(file_name, epoch, loss):
+    with open(os.path.join(root, file_name), 'a') as file:
+        file.write(f'{epoch}, {loss}\n')
 
 
 # Train
@@ -84,8 +79,8 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
         del src, trg
 
     train_loss /= num_batches
-    train_losses = np.append(train_losses, [[epoch], [train_loss]], axis=1)
     writer.add_scalar('Loss/train', train_loss, epoch)
+    append_loss('train.csv', epoch, train_loss)
 
     if epoch % 10 == 0:
         # Evaluate model
@@ -109,10 +104,7 @@ for epoch in tqdm(range(config.NUM_EPOCHS), desc='Epoch'):
                 del src, trg
 
             valid_loss /= num_batches
-            valid_losses = np.append(valid_losses, [[epoch], [valid_loss]], axis=1)
-            writer.add_scalar('Loss/validation', valid_loss, epoch)
+            writer.add_scalar('Loss/valid', valid_loss, epoch)
+            append_loss('valid.csv', epoch, valid_loss)
 
-            save_metrics()
-
-save_metrics()
 torch.save(model.state_dict(), os.path.join(weight_dir, 'final'))
