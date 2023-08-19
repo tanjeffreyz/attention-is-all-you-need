@@ -64,20 +64,17 @@ class TestTransformer(unittest.TestCase):
     def test_encoder_layer(self):
         x = torch.rand((64, 30, 512))
         encoder = EncoderLayer(512)
-        enc_mask = torch.zeros((64, 1, 1, 30), dtype=torch.bool)
         self.assertEqual(
             torch.Size([64, 30, 512]),
-            encoder(x, enc_mask).size()
+            encoder(x).size()
         )
 
     def test_decoder_layer(self):
         x = torch.rand((64, 30, 512)).to(DecoderLayer.device)
         decoder = DecoderLayer(512).to(DecoderLayer.device)
-        enc_mask = torch.zeros((64, 1, 1, 30), dtype=torch.bool).to(DecoderLayer.device)
-        dec_mask = torch.zeros((64, 1, 30, 30), dtype=torch.bool).to(DecoderLayer.device)
         self.assertEqual(
             torch.Size([64, 30, 512]),
-            decoder(x, x, enc_mask, dec_mask).size()
+            decoder(x, x).size()
         )
 
     def test_feed_forward_network(self):
