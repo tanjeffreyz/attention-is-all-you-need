@@ -12,7 +12,8 @@ This is the transformer architecture as described in [1]:
 
 
 ### Positional Encoding
-The position of each token in a sequence is encoded using the following formula:
+The position of each token in a sequence is encoded using the following formula and then
+added on top of the token's embedding vector.
 
 <div align="center">
   <img src="docs/pos_encoding_formula.png" width="300px" />
@@ -24,6 +25,10 @@ The position of each token in a sequence is encoded using the following formula:
 
 
 ### Multi-head Attention
+In a multi-head attention sublayer, the input queries, keys, and values are each projected into 
+`num_heads` vectors of size `d_model / num_heads`. Then, `num_heads` scaled dot-product
+attention operations are performed in parallel, and their outputs are concatenated and projected back into 
+size `d_model`.
 
 
 ## Results
