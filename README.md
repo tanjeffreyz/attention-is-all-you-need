@@ -57,6 +57,8 @@ time the validation loss plateaus:
 
 ## Results
 
+<img src="experiments/en-de/08_19_2023/17_27_32/losses.png" width="50%" /><img src="experiments/en-de/08_19_2023/17_27_32/bleu.png" width="50%" />
+
 
 ## Notes
 Transformers are trained using a technique called "teacher forcing", which is also used to train recurrent neural networks.
