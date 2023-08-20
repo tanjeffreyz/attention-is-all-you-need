@@ -4,6 +4,7 @@ from data import Dataset
 from modules import Transformer
 from nltk.translate.bleu_score import sentence_bleu
 from utils.experiment import Experiment
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 print('[~] Training')
@@ -57,8 +58,8 @@ ax.set(xlabel='Epoch', ylabel='Learning Rate', title='Learning Rate Schedule')
 plt.savefig(os.path.join(experiment.path, 'lr_schedule.png'))
 """
 
-# Instead, reducing LR by factor of 0.1 on loss plateau works much, much better
-scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+# Instead, reducing LR by factor on loss plateau works much, much better
+scheduler = ReduceLROnPlateau(optimizer, factor=config.LR_REDUCTION_FACTOR)
 
 # Cross entropy loss
 loss_function = torch.nn.CrossEntropyLoss()
@@ -137,6 +138,7 @@ def validate(epoch):
 
         experiment.add_scalar('loss/validation', epoch, valid_loss / num_batches)
         experiment.add_scalar('bleu', epoch, bleu_score / num_batches)
+        experiment.add_scalar('lr', epoch, next(iter(optimizer.param_groups))['lr'])
 
 
 experiment.loop(config.NUM_EPOCHS, train)
