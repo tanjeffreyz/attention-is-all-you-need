@@ -18,6 +18,11 @@ The position of each token in a sequence is encoded using the following formula:
   <img src="docs/pos_encoding_formula.png" width="300px" />
 </div>
 
+Here is a visualization of the positional encoding:
+
+<div align="center">
+  <img src="docs/positional_encoding.png" width="600px" />
+</div>
 
 
 ### Multi-head Attention

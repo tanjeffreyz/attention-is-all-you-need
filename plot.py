@@ -59,7 +59,7 @@ def plot_positional_encoding():
     pos_encoding = embedding.positional_encoding(data)
 
     ax = sns.heatmap(pos_encoding)
-    ax.set(xlabel='Dimension', ylabel='Position')
+    ax.set(xlabel='Embedding Dimension', ylabel='Token Position')
     plt.savefig(os.path.join('docs', 'positional_encoding.png'))
     plt.show()
 
