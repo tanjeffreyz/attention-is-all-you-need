@@ -62,6 +62,8 @@ time the validation loss plateaus:
 For English-to-German translation (EN-DE), my implementation achieved a maximum BLEU score of `27.0` on the test set, 
 which is comparable to the score of `27.3` found in [1].
 
+The trained model weights can be found [here](https://drive.google.com/file/d/1adGwkLXivssKgfT-trn_NNAHRJMX_D3X/view?usp=drive_link).
+
 ## Notes
 Transformers are trained using a technique called "teacher forcing", which is also used to train recurrent neural networks.
 During training, the model is actually given the ground truth `tokens[:n]` as input and asked to predict the `n`th token.
