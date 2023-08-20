@@ -5,6 +5,7 @@ import seaborn as sns
 from data import Dataset
 from modules import Transformer
 from matplotlib import pyplot as plt
+from nltk.translate.bleu_score import sentence_bleu
 from utils.experiment import Experiment
 
 
@@ -84,8 +85,7 @@ def train(epoch):
         num_batches += 1
         del src, trg
 
-    train_loss /= num_batches
-    experiment.add_scalar('loss/train', epoch, train_loss)
+    experiment.add_scalar('loss/train', epoch, train_loss / num_batches)
 
     if epoch % 10 == 0:
         validate(epoch)
@@ -97,6 +97,7 @@ def validate(epoch):
         model.eval()
         valid_loss = 0
         num_batches = 0
+        bleu_score = 0
         for data in dataset.valid_loader:
             src = data['source'].to(model.device)
             trg = data['target'].to(model.device)
@@ -108,12 +109,28 @@ def validate(epoch):
                 trg[:, 1:].reshape(-1)
             )
 
+            # Calculate BLEU score
+            batch_size = predictions.size(0)
+            batch_bleu = 0
+            p_indices = torch.argmax(predictions, dim=-1)
+            for i in range(batch_size):
+                p_tokens = dataset.trg_vocab.lookup_tokens(p_indices[i].tolist())
+                t_tokens = dataset.trg_vocab.lookup_tokens(trg[i, 1:].tolist())
+
+                # Filter out special tokens
+                p_tokens = list(filter(lambda x: '<' not in x, p_tokens))
+                t_tokens = list(filter(lambda x: '<' not in x, t_tokens))
+
+                if len(p_tokens) > 0 and len(t_tokens) > 0:
+                    batch_bleu += sentence_bleu([t_tokens], p_tokens)
+            bleu_score += batch_bleu / batch_size
+
             valid_loss += loss.item()
             num_batches += 1
             del src, trg
 
-        valid_loss /= num_batches
-        experiment.add_scalar('loss/validation', epoch, valid_loss)
+        experiment.add_scalar('loss/validation', epoch, valid_loss / num_batches)
+        experiment.add_scalar('bleu', epoch, bleu_score / num_batches)
 
 
 experiment.loop(config.NUM_EPOCHS, train)
