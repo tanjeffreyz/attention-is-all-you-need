@@ -1,4 +1,7 @@
+nltk==3.8.1
 spacy==3.6.1
-torch==2.0.1+cu118
+torch==2.0.1
 torchtext==0.15.2
+tqdm==4.64.0
 portalocker>=2.0.0
+tensorboard==2.9.1
