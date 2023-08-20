@@ -5,7 +5,6 @@ Lukasz Kaiser, Illia Polosukhin
 
 
 ## Architecture
-This is the transformer architecture as described in [1]:
 <div align="center">
   <img src="docs/architecture.png" width="600px" />
 </div>
