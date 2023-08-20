@@ -4,10 +4,27 @@ by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aida
 Lukasz Kaiser, Illia Polosukhin
 
 
-# Methods
+## Methods
+This is the transformer architecture as described in [1]:
+![architecture.png](docs/architecture.png)
 
 
-# Notes
+### Positional Encoding
+The position of each token in a sequence is encoded using the following formula:
+
+<div align="center">
+  <img src="docs/pos_encoding_formula.png" width="300px" />
+</div>
+
+
+
+### Multi-head Attention
+
+
+## Results
+
+
+## Notes
 - Input of size `batch_size * sequence_length * embedding_size`
 - length of sequence can vary: `W_Q, W_K, W_V` are all of shape `d_model * d_v` which does not depend on sequence length
 - output of the topmost encoder layer is fed in as the `key` and `value` into each layer in the decoder
@@ -27,3 +44,10 @@ Lukasz Kaiser, Illia Polosukhin
 python -m spacy download en_core_web_sm
 python -m spacy download de_core_news_sm
 ```
+
+## References
+
+[[1](https://arxiv.org/abs/1706.03762)] 
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin.
+Attention Is All You Need. 
+_arXiv:1706.03762 [cs.CL]_
