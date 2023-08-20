@@ -45,6 +45,7 @@ def plot_bleu():
         os.path.join(PATH, 'scalars', 'bleu.csv'),
         header=None
     ).head(NUM_EPOCHS)
+    bleu_df[1] *= 100
 
     ax = sns.lineplot(bleu_df, x=0, y=1)
     ax.set(xlabel='Epoch', ylabel='BLEU Score',

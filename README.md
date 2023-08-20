@@ -60,7 +60,7 @@ time the validation loss plateaus:
 <img src="experiments/en-de/08_19_2023/17_27_32/losses.png" width="50%" /><img src="experiments/en-de/08_19_2023/17_27_32/bleu.png" width="50%" />
 
 For English-to-German translation (EN-DE), my implementation achieved a maximum BLEU score of `27.0` on the test set, 
-which is comparable to the `27.3` found in [1].
+which is comparable to the score of `27.3` found in [1].
 
 ## Notes
 Transformers are trained using a technique called "teacher forcing", which is also used to train recurrent neural networks.
