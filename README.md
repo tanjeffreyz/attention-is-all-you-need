@@ -6,7 +6,9 @@ Lukasz Kaiser, Illia Polosukhin
 
 ## Methods
 This is the transformer architecture as described in [1]:
-![architecture.png](docs/architecture.png)
+<div align="center">
+  <img src="docs/architecture.png" width="600px" />
+</div>
 
 
 ### Positional Encoding
