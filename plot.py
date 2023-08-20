@@ -23,6 +23,7 @@ def plot_losses():
     sns.lineplot(train_df, x=0, y=1, label='Train Loss')
     ax = sns.lineplot(valid_df, x=0, y=1, label='Validation Loss')
     ax.set(xlabel='Epoch', ylabel='Loss', title='Training and Validation Losses')
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(PATH, 'losses.png'))
     plt.show()
 
@@ -36,6 +37,7 @@ def plot_lr():
     ax = sns.lineplot(lr_df, x=0, y=1)
     ax.set(xlabel='Epoch', ylabel='Learning Rate',
            title='Learning Rate Schedule')
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(PATH, 'lr.png'))
     plt.show()
 
@@ -50,6 +52,7 @@ def plot_bleu():
     ax = sns.lineplot(bleu_df, x=0, y=1)
     ax.set(xlabel='Epoch', ylabel='BLEU Score',
            title='Validation BLEU Score')
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(os.path.join(PATH, 'bleu.png'))
     plt.show()
 
@@ -61,6 +64,7 @@ def plot_positional_encoding():
 
     ax = sns.heatmap(pos_encoding)
     ax.set(xlabel='Embedding Dimension', ylabel='Token Position', title='Positional Encoding')
+    plt.subplots_adjust(bottom=0.175, right=0.95)
     plt.savefig(os.path.join('docs', 'positional_encoding.png'))
     plt.show()
 
