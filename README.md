@@ -4,7 +4,7 @@ by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aida
 Lukasz Kaiser, Illia Polosukhin
 
 
-## Methods
+## Architecture
 This is the transformer architecture as described in [1]:
 <div align="center">
   <img src="docs/architecture.png" width="600px" />
@@ -16,7 +16,7 @@ The position of each token in a sequence is encoded using the following formula 
 added on top of the token's embedding vector.
 
 <div align="center">
-  <img src="docs/pos_encoding_formula.png" width="300px" />
+  <img src="docs/positional_encoding_formula.png" width="300px" />
 </div>
 
 <div align="center">
@@ -29,6 +29,31 @@ In a multi-head attention sublayer, the input queries, keys, and values are each
 `num_heads` vectors of size `d_model / num_heads`. Then, `num_heads` scaled dot-product
 attention operations are performed in parallel, and their outputs are concatenated and projected back into 
 size `d_model`.
+
+
+## Methods
+Overall, this implementation almost exactly follows the architecture and parameters described in [1]. 
+However, due to limited resources, I instead trained using the smaller `Multi30k` machine translation dataset.
+
+
+### Learning Rate Schedule
+The learning rate schedule used in [1] is shown below:
+
+<div align="center">
+  <img src="docs/paper_lr_schedule_formula.png" width="500px" />
+</div>
+
+<div align="center">
+  <img src="docs/paper_lr_schedule.png" width="600px" />
+</div>
+
+However, during my experiments, models trained using this schedule failed to achieve BLEU scores above `0.01`.
+Instead, I used PyTorch's `ReduceLROnPlateau` scheduler, which decreases the learning rate by `factor=0.5` every
+time the validation loss plateaus:
+
+<div align="center">
+  <img src="experiments/en-de/08_19_2023/17_27_32/lr.png" width="600px" />
+</div>
 
 
 ## Results
