@@ -1,7 +1,9 @@
 import os
+import torch
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
+from modules.embedding import Embedding
 
 
 PATH = 'experiments/en-de/08_19_2023/17_27_32'
@@ -51,7 +53,19 @@ def plot_bleu():
     plt.show()
 
 
+def plot_positional_encoding():
+    embedding = Embedding(512, 1000, 0)
+    data = torch.zeros((1, 50))
+    pos_encoding = embedding.positional_encoding(data)
+
+    ax = sns.heatmap(pos_encoding)
+    ax.set(xlabel='Dimension', ylabel='Position')
+    plt.savefig(os.path.join('docs', 'positional_encoding.png'))
+    plt.show()
+
+
 if __name__ == '__main__':
     plot_losses()
     plot_lr()
     plot_bleu()
+    plot_positional_encoding()

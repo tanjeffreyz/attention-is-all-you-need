@@ -4,6 +4,9 @@ by Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aida
 Lukasz Kaiser, Illia Polosukhin
 
 
+# Methods
+
+
 # Notes
 - Input of size `batch_size * sequence_length * embedding_size`
 - length of sequence can vary: `W_Q, W_K, W_V` are all of shape `d_model * d_v` which does not depend on sequence length
