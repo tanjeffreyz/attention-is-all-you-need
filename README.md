@@ -62,7 +62,7 @@ time the validation loss plateaus:
 Transformers are trained using a technique called "teacher forcing", which is also used to train recurrent neural networks.
 During training, the model is actually given the ground truth `tokens[:n]` as input and asked to predict the `n`th token.
 
-# Setup Instructions
+## Setup Instructions
 1. Install requirements 
 ```
 python -m pip install -r requirements.txt
