@@ -52,4 +52,4 @@ with torch.no_grad():
         num_batches += 1
         del src, trg
 
-    print('\nBLEU score:', bleu_score / num_batches)
+    print('\nBLEU score:', bleu_score / num_batches * 100)
