@@ -1,10 +1,7 @@
 import torch
 import config
-import os
-import seaborn as sns
 from data import Dataset
 from modules import Transformer
-from matplotlib import pyplot as plt
 from nltk.translate.bleu_score import sentence_bleu
 from utils.experiment import Experiment
 
@@ -38,19 +35,30 @@ optimizer = torch.optim.Adam(
 )
 
 
-# LR Scheduler
+# Lambda LR Scheduler as described in paper:
+"""
+import os
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+
 def get_lr(x):
     x += 1      # x is originally zero-indexed
     return (config.D_MODEL ** (-0.5)) * min(x ** (-0.5), x * (config.NUM_WARMUP ** (-1.5)))
 
 
 scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, get_lr)
+
 ax = sns.lineplot(
     x=range(config.NUM_EPOCHS),
     y=[get_lr(x) for x in range(config.NUM_EPOCHS)]
 )
 ax.set(xlabel='Epoch', ylabel='Learning Rate', title='Learning Rate Schedule')
 plt.savefig(os.path.join(experiment.path, 'lr_schedule.png'))
+"""
+
+# Instead, reducing LR by factor of 0.1 on loss plateau works much, much better
+scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
 
 # Cross entropy loss
 loss_function = torch.nn.CrossEntropyLoss()
@@ -79,16 +87,13 @@ def train(epoch):
         )
         loss.backward()
         optimizer.step()
-        scheduler.step()
 
         train_loss += loss.item()
         num_batches += 1
         del src, trg
 
     experiment.add_scalar('loss/train', epoch, train_loss / num_batches)
-
-    if epoch % 10 == 0:
-        validate(epoch)
+    validate(epoch)
 
 
 # Evaluate against validation set and calculate BLEU
@@ -126,6 +131,7 @@ def validate(epoch):
             bleu_score += batch_bleu / batch_size
 
             valid_loss += loss.item()
+            scheduler.step(loss.item())
             num_batches += 1
             del src, trg
 
