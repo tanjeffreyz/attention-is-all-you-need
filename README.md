@@ -23,6 +23,16 @@ added on top of the token's embedding vector.
 </div>
 
 
+A special property of this positional encoding method is that $PE_{x + k}$ can be represented as a linear function of $PE_{x}$, which allows the model to easily attend to tokens by their relative positions:
+
+$$PE_{(x + k, 2i)} = sin((x + k) / 10000^{2i / d_{model}})$$
+
+$$PE_{(x + k, 2i)} = sin(x / 10000^{2i / d_{model}}) * cos(k / 10000^{2i / d_{model}}) + cos(x / 10000^{2i / d_{model}}) * sin(k / 10000^{2i / d_{model}})$$
+
+$$PE_{(x + k, 2i)} = PE_{(x, 2i)} * cos(k / 10000^{2i / d_{model}}) + PE_{(x, 2i+1)} * sin(k / 10000^{2i / d_{model}})$$
+
+
+
 ### Multi-head Attention
 In a multi-head attention sublayer, the input queries, keys, and values are each projected into 
 `num_heads` vectors of size `d_model / num_heads`. Then, `num_heads` scaled dot-product
