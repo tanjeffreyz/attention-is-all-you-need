@@ -14,9 +14,10 @@ Lukasz Kaiser, Illia Polosukhin
 The position of each token in a sequence is encoded using the following formula and then
 added on top of the token's embedding vector.
 
-<div align="center">
-  <img src="docs/positional_encoding_formula.png" width="300px" />
-</div>
+
+$$PE_{(pos, 2i)} = sin(pos / 10000^{2i / d_{model}})$$
+
+$$PE_{(pos, 2i + 1)} = cos(pos / 10000^{2i / d_{model}})$$
 
 <div align="center">
   <img src="docs/positional_encoding.png" width="600px" />
